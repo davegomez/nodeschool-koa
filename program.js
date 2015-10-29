@@ -1,19 +1,25 @@
 'use strict';
 
-const session = require('koa-session');
+const views = require('co-views');
 const koa = require('koa');
 
 const app = koa();
 
-// to use signed cookie, we need to set app.keys
-app.keys = ['secret', 'keys'];
-app.use(session(app));
+const user = {
+  name: {
+    first: 'Tobi',
+    last: 'Holowaychuk'
+  },
+  species: 'ferret',
+  age: 3
+};
 
-app.use(function *(){
-  const view = ~~this.cookies.get('view', { signed: true }) + 1;
-  this.cookies.set('view', view, { signed: true });
-  this.body = `${view} views`;
+const render = views(__dirname + '/views', {
+  ext: 'ejs'
 });
-// ~~ it is used as a faster substitute for Math.floor().
+
+app.use(function *() {
+  this.body = yield render('user', {user: user});
+});
 
 app.listen(process.argv[2]);
