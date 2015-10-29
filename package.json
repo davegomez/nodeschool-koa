@@ -13,6 +13,7 @@
   "author": "David Gómez",
   "license": "MIT",
   "dependencies": {
+    "co-body": "^4.0.0",
     "koa": "^1.1.1"
   }
 }
