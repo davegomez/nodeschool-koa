@@ -1,26 +1,19 @@
 const koa = require('koa');
-const app = koa();
 const parse = require('co-body');
 
+const app = koa();
+
 app.use(function* (next) {
-  if (this.path !== '/') return yield next;
-  const body = yield parse(this);
+  // only accept POST request
+  if (this.method !== 'POST') return yield next;
+
+  // max body size limit to `1kb`
+  var body = yield parse(this, { limit: '1kb' });
+
+  // if body.name not exist, respond `400`
+  if (!body.name) this.throw(400, '.name required');
+
   this.body = body.name.toUpperCase();
-});
-
-app.use(function* (next) {
-  if (this.path !== '/404') return yield next;
-  this.body = 'page not found';
-});
-
-app.use(function* (next) {
-  if (this.path !== '/500') return yield next;
-  this.body = 'internal server error';
-});
-
-app.use(function* (next) {
-  if (this.path !== '/test') return yield next;
-  this.body = JSON.stringify({ name: 'Dave' });
 });
 
 app.listen(process.argv[2]);
