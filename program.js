@@ -1,23 +1,17 @@
+'use strict';
+
+const session = require('koa-session');
 const koa = require('koa');
 
 const app = koa();
 
-app.use(errorHandler());
-
-app.use(function *() {
-  if (this.path === '/error') throw new Error('ooops');
-  this.body = 'OK';
+// to use signed cookie, we need to set app.keys
+app.keys = ['secret', 'keys'];
+app.use(function *(){
+  const view = ~~this.cookies.get('view', { signed: true }) + 1;
+  this.cookies.set('view', view, { signed: true });
+  this.body = view + ' views';
 });
-
-function errorHandler() {
-  return function *(next) {
-    try {
-      yield next;
-    } catch (err) {
-      this.status = err.status || 500;
-      this.body = 'internal server error';
-    }
-  };
-}
+// ~~ it is used as a faster substitute for Math.floor().
 
 app.listen(process.argv[2]);
