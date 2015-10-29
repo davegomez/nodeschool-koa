@@ -1,13 +1,27 @@
-const fs = require('fs');
 const koa = require('koa');
-const parse = require('co-body');
-
 const app = koa();
 
-app.use(function *(next) {
-  if (this.path !== '/') return yield next;
+app.use(responseTime());
+app.use(upperCase());
 
-  this.body = this.request.is('application/json') ? {message: 'hi!'} : 'ok';
+app.use(function *() {
+  this.body = 'hello koa';
 });
+
+function responseTime() {
+  return function *(next) {
+    const start = new Date;
+    yield next;
+    const ms = new Date - start;
+    this.set('X-Response-Time', `${ms}ms`);
+  };
+}
+
+function upperCase() {
+  return function *(next) {
+    yield next;
+    this.body = this.body.toUpperCase();
+  };
+}
 
 app.listen(process.argv[2]);
